@@ -6,20 +6,18 @@ async function review() {
     const staticResult = document.getElementById("staticResult");
     const aiResult = document.getElementById("aiResult");
 
-    // Jangan biarkan pengguna menekan tombol kosong
     if (!codeInput.trim()) {
-        statusMessage.textContent = "BERHENTI! Anda belum memasukkan kode apa pun untuk di-review.";
+        statusMessage.textContent = "ABORTED: Empty payload. Provide code to analyze.";
         statusMessage.classList.add("text-red-500");
         resultContainer.classList.add("hidden");
         return;
     }
 
-    // Ubah state UI ke mode Loading
     btn.disabled = true;
-    btn.textContent = "Menganalisis...";
+    btn.textContent = "Processing...";
     resultContainer.classList.add("hidden");
     statusMessage.classList.remove("hidden", "text-red-500");
-    statusMessage.textContent = "Mengirim data ke server dan menunggu komputasi Llama 3.1...";
+    statusMessage.textContent = "Transmitting payload to backend and awaiting LLM computation...";
 
     try {
         const response = await fetch("http://127.0.0.1:8000/review", {
@@ -32,15 +30,14 @@ async function review() {
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.detail || "Server API hancur atau tidak merespons.");
+            throw new Error(errorData.detail || `Server returned HTTP ${response.status}`);
         }
 
         const data = await response.json();
 
-        // Render Analisis Statis
         staticResult.innerHTML = "";
-        if (data.static_issues.length === 0 || data.static_issues[0].includes("Tidak ditemukan")) {
-            staticResult.innerHTML = "<li class='text-green-600'>Kode bersih. Tidak ada pelanggaran statis fatal.</li>";
+        if (data.static_issues.length === 0 || data.static_issues[0].includes("Tidak ditemukan") || data.static_issues[0].includes("clean")) {
+            staticResult.innerHTML = "<li class='text-green-600'>No static violations detected. Code passes basic linting.</li>";
             staticResult.parentElement.querySelector('ul').classList.replace('bg-red-50', 'bg-green-50');
             staticResult.parentElement.querySelector('ul').classList.replace('border-red-100', 'border-green-100');
         } else {
@@ -53,20 +50,17 @@ async function review() {
             staticResult.parentElement.querySelector('ul').classList.replace('border-green-100', 'border-red-100');
         }
 
-        // Parse dan Render Review AI menggunakan marked.js
         aiResult.innerHTML = marked.parse(data.ai_review);
 
-        // Tampilkan hasil, sembunyikan loading
         statusMessage.classList.add("hidden");
         resultContainer.classList.remove("hidden");
 
     } catch (error) {
         statusMessage.classList.remove("hidden");
-        statusMessage.textContent = `KEGAGALAN SISTEM: ${error.message}`;
+        statusMessage.textContent = `SYSTEM FAILURE: ${error.message}`;
         statusMessage.classList.add("text-red-600", "font-bold");
     } finally {
-        // Kembalikan tombol ke state semula
         btn.disabled = false;
-        btn.textContent = "Jalankan Review";
+        btn.textContent = "Run Analysis";
     }
 }
