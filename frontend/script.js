@@ -20,7 +20,7 @@ async function review() {
     statusMessage.textContent = "Transmitting payload to backend and awaiting LLM computation...";
 
     try {
-        const response = await fetch("http://127.0.0.1:8000/review", {
+        const response = await fetch("https://nathanielsteave.pythonanywhere.com/review")", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
