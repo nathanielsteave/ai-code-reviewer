@@ -34,4 +34,4 @@ Code:
         )
         return chat.choices[0].message.content
     except Exception as e:
-        raise Exception(f"Kegagalan koneksi Groq AI: {str(e)}")
+        raise Exception(f"Kegagalan koneksi AI: {str(e)}")
