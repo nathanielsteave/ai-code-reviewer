@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from analyzer import analyze_code
 from ai_reviewer import ai_review
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
